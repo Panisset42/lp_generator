@@ -2,9 +2,10 @@
 import importlib
 import json
 import os
-
+from typing import List
 from selenium import webdriver
-
+from selenium.webdriver.common.by import By
+from time import sleep
 from lp_generator.IModel import IModel
 from pre_process_model import pre_process_model  # Import the pre_process_model class
 
@@ -15,7 +16,19 @@ def read_csv_file(file_path):
 
 
 def login():
+    # get login info
+    user_account = input("Insira o usuário: ")
+    user_pass = input("Insira a senha: ")
+    # instantiate driver and go to the site
     driver = webdriver.Chrome()
+    driver.get('https://app.greatpages.com.br/login')
+    # get camps and making login
+    user_input = driver.find_element(By.XPATH, "//*[@id=\"usuario\"]")
+    pass_input = driver.find_element(By.XPATH, "//*[@id=\"senha\"]")
+    user_input.send_keys(user_account)
+    pass_input.send_keys(user_pass)
+    pass_input.submit()
+    # returning driver
     return driver
 
 
@@ -36,18 +49,22 @@ def pre_process():
     model.run()
 
 
-def import_model(pre_processed_model):
-    with open(pre_processed_model, 'r') as f:
-        pre_processed_data = json.load(f)
-    model_name = pre_processed_data.get('model')
+def import_model(class_name):
+    model_dir = 'models'  # Note: Removed the leading './' for the package name
+    package_name = 'models'  # Specify the package name
 
-    if f"{model_name}.py" in os.listdir('./models'):
-        module = importlib.import_module(f'models.{model_name}')
+    for filename in os.listdir(model_dir):
+        if filename.endswith(".py"):
+            module_name = filename[:-3]  # Remove the '.py' extension
+            module = importlib.import_module(f'{package_name}.{module_name}')
 
-        model_class = [cls for cls in module.__dict__.values() if isinstance(cls, type) and issubclass(cls, IModel)][0]
-        model_instance = model_class()
-        model_instance.initialize(pre_processed_data)
-        return model_instance
+            # Check if the class exists in the module
+            if hasattr(module, class_name):
+                my_class = getattr(module, class_name)
+                instance = my_class()
+                return instance
+
+    return None  # Class not found
 
 
 def get_pre_processed_models():
@@ -61,17 +78,26 @@ def get_pre_processed_models():
 
 def main():
     pre_process()
-    # driver = login()
-    pre_processed_models = get_pre_processed_models()
-
-    for pre_processed_model in pre_processed_models:
-       # Se for um modelo de agenda
-       # enviar todos eles e ao final enviar um código de confirmacao
-       # se nao, iniciar o processo de criação imediatamente
-
-       model = import_model(pre_processed_model)
-       model.run()
-
+    driver = login()
+    needed_models = []
+    pre_processed_models_path = []
+    #verify the models that will be needed
+    for archive in get_pre_processed_models():
+        with open(archive,'r',encoding='utf-8') as f:
+            archive_data = json.load(f)
+            if archive_data["model"] not in needed_models:
+                needed_models.append(archive_data["model"])
+    # for each needed model generate a list and execute it
+    for model in needed_models:
+        process_batch = []
+        for archive in get_pre_processed_models():
+            with open(archive,'r',encoding='utf-8') as f:
+                archive_data = json.load(f)
+                if archive_data["model"] == model:
+                    process_batch.append(archive)
+        instance = import_model(model)
+        instance.initialize(process_batch, driver)
+        instance.run()
 
 if __name__ == '__main__':
     main()
