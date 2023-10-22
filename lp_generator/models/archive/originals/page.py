@@ -1,14 +1,11 @@
 from lp_generator.IModel import IModel
 import json
-
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 class page(IModel):
-    def initialize(self, data):
-        self.link  = data.get('link')
-        self.name  = data.get('name')
-        self.city  = data.get('city')
-        self.date  = data.get('date')
-        self.model = data.get('model')
-
+    def initialize(self, data, driver):
+        self.data  = data
+        self.driver = driver
     def run(self):
-        print(f'running automation for model "{self.model}" into the city: {self.city}')
+        pass
