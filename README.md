@@ -6,21 +6,21 @@ for now works only with the [greatpages](https://www.greatpages.com.br) software
 # How to use
 
 Create a csv archive with all the info and insert in the './lp_generator/archives/csv' directory, for now the csv has the name test, and this is what the program will lok for, i do plan to change this in the near future
-all the info you need to inser in the csv is link,	model,	page_name,	city and	date
+all the info you need to inser in the csv is [link](#link),	[model](#model),	[page_name](#page_name),	[city](#city) and	[date](#date)
 
-## link
+## link<a name="link"></a>
 this info is the link to the model page you should have in your account, this page will be cloned and edited to add the info you want in it
 
-## model
+## model<a name="model"></a> 
 This is the name of the model, i strongly advise into keeping this into a standard in the program and in the plataform
 
-## page_name
+## page_name<a name="page_name"></a>
 This info is the one you should use to rename the page in the greatpages plataform, again i advise you to have a solid standard for this one
 
-## city
+## city<a name="city"></a>
 Since i work with events this one is a information that i'm going to insert into the landing page
 
-## date
+## date<a name="date"></a>
 As City, a info that is going to be inserted in the final model, but also will be organized to be put into the page name for rastreability
 
 # How it Works
